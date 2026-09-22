@@ -1,6 +1,8 @@
 # Plugin quickstart
 
-Ten minutes from nothing to a module running in the app.
+Ten minutes from nothing to a module running in the app. If you have not
+installed or run the platform yet, start with
+[getting-started.md](getting-started.md).
 
 ## 1. Pick the extension point
 

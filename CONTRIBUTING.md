@@ -17,6 +17,10 @@ here as a module — and most modules are one file.
 If you are unsure whether something is a plugin or a core change: if another
 institute could reasonably not want it, it is a plugin.
 
+If you have not run the app yet, start with
+[docs/getting-started.md](docs/getting-started.md) — it covers installing,
+running an analysis and writing a first module.
+
 ## Setting up
 
 ```bash

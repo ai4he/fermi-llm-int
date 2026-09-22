@@ -18,6 +18,7 @@ about to edit core to add a feature, stop — it is almost certainly a plugin.
 
 | Task | Read |
 |---|---|
+| orienting from zero | `docs/getting-started.md` |
 | adding any capability | `docs/module-types.md`, `docs/plugin-quickstart.md` |
 | anything that will be shared with other institutes | `docs/integration-rules.md` (R1–R12) |
 | integrating another codebase | `docs/agent-playbook.md` |

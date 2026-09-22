@@ -25,6 +25,10 @@ cd fermi-llm-int
 ./scripts/run_webapp.sh               # http://localhost:8765
 ```
 
+New here? **[docs/getting-started.md](docs/getting-started.md)** walks through
+your first analysis, configuring the app for your machine, and writing your
+first module.
+
 With no credentials configured it still runs: guest mode, the rule-based
 `template` model, and the three bundled demonstration sources (Mrk 421, the
 Vela pulsar, the Crab). Add an API key in `configs/` to enable a real model —
@@ -91,6 +95,7 @@ plugged in right now, including anything that failed to load.
 
 | | |
 |---|---|
+| [getting-started.md](docs/getting-started.md) | install, run an analysis, configure, extend |
 | [architecture.md](docs/architecture.md) | how it fits together, with diagrams |
 | [module-types.md](docs/module-types.md) | the contract for each extension point |
 | [integration-rules.md](docs/integration-rules.md) | the rules a module must follow |
