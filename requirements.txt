@@ -1,0 +1,33 @@
+# Python dependencies for the Fermi-LLM testbed web application.
+#
+# This file installs:
+#   - The FastAPI web server stack
+#   - Google's Gemini SDK (for cloud-API generation)
+#   - HuggingFace Transformers (for local GPU generation; optional)
+#   - The OpenAI Python client (for any OpenAI-compatible vLLM endpoint)
+#
+# FermiPy itself is *not* installed via pip; see scripts/setup.sh for the
+# conda-based installation of the Fermi ScienceTools and FermiPy.
+
+# Web server
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+python-multipart==0.0.12
+starlette==0.41.0
+pydantic==2.9.2
+websockets==13.1
+sse-starlette==2.1.3
+
+# HTTP and JSON
+requests==2.32.3
+httpx==0.27.2
+pyyaml==6.0.2
+
+# Cloud APIs
+google-generativeai==0.8.3
+openai==1.54.4
+
+# Local model inference (optional, install with: pip install -r requirements-local.txt)
+# The local-model dependencies are pinned in requirements-local.txt because
+# they are large (~5 GB for torch + CUDA wheels) and only needed if you plan
+# to run a Hugging Face model on a local GPU.

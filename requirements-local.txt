@@ -1,0 +1,24 @@
+# Optional local-model dependencies, for running Hugging Face checkpoints on a
+# local GPU. Install with:
+#
+#     pip install -r requirements-local.txt
+#
+# Notes:
+#   * PyTorch is pinned to the CUDA 12.4 wheel index. On a CPU-only machine you
+#     can install the CPU wheel instead with:
+#         pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   * `transformers` and `accelerate` cover the standard Hugging Face inference
+#     path; `bitsandbytes` is only required if you want 4/8-bit quantisation.
+
+--index-url https://download.pytorch.org/whl/cu124
+--extra-index-url https://pypi.org/simple
+
+torch==2.5.1
+transformers==4.46.2
+accelerate==1.1.1
+safetensors==0.4.5
+sentencepiece==0.2.0
+tokenizers==0.20.3
+einops==0.8.0
+# Optional: 4/8-bit quantisation for large models on smaller GPUs
+bitsandbytes==0.44.1

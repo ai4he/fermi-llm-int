@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fermi LLM</title>
+    <!-- The active skin, chosen by the deployment (see components/ui/skins.py). -->
+    <link rel="stylesheet" href="/api/ui/skin.css?v=1">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button id="sidebar-toggle" class="icon-btn" onclick="toggleSidebar()" title="Open sidebar" aria-label="Open sidebar">&#9776;</button>
+                <h1>Fermi LLM</h1>
+            </div>
+            <div class="header-center">
+                <div class="model-selector-wrap">
+                    <label for="model-select" class="model-label">Model:</label>
+                    <select id="model-select" class="model-select" title="Select generation model">
+                        <option value="gpt-5.6-luna">ChatGPT Luna 5.6</option>
+                    </select>
+                    <span id="model-status" class="model-status-dot" title="Model status"></span>
+                    <span id="gpu-info" class="gpu-info"></span>
+                    <span id="version-info" class="gpu-info" title="FermiPy / Fermi ScienceTools versions in use"></span>
+                </div>
+            </div>
+            <div class="header-right">
+                <span id="session-id" class="session-badge"></span>
+                <div class="panel-toggles">
+                <button onclick="togglePanel('chat')" class="panel-toggle active" data-panel="chat" title="Toggle Chat">Chat</button>
+                <button onclick="togglePanel('yaml')" class="panel-toggle active" data-panel="yaml" title="Toggle YAML">YAML</button>
+                <button onclick="togglePanel('python')" class="panel-toggle active" data-panel="python" title="Toggle Python">Python</button>
+                <button onclick="togglePanel('outputs')" class="panel-toggle active" data-panel="outputs" title="Toggle Outputs">Outputs</button>
+                <button onclick="togglePanel('results')" class="panel-toggle" data-panel="results" title="Toggle Results">Results</button>
+                <button onclick="togglePanel('notebook')" class="panel-toggle" data-panel="notebook" title="Toggle Notebook">Notebook</button>
+                <button onclick="togglePanel('explain')" class="panel-toggle active" data-panel="explain" title="Toggle Explainability">Explain</button>
+                </div>
+                <div id="auth-area" class="auth-area">
+                    <!-- Google renders its Sign-In button here when configured -->
+                    <div id="google-signin-btn" class="gsi-btn-wrap"></div>
+                    <div id="user-menu" class="user-menu hidden">
+                        <img id="user-avatar" class="user-avatar" alt="" referrerpolicy="no-referrer">
+                        <span id="user-name" class="user-name"></span>
+                        <button class="auth-btn ghost" onclick="signOut()" title="Sign out">Sign out</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Pipeline Progress Bar -->
+        <div id="pipeline-progress" class="pipeline-progress hidden">
+            <div class="progress-steps">
+                <div class="progress-step" id="step-master" data-step="master">
+                    <div class="step-indicator">
+                        <div class="step-icon">M</div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-label">Master Agent</div>
+                        <div class="step-detail" id="step-master-detail">Prompt analysis & code generation</div>
+                    </div>
+                </div>
+                <div class="progress-connector"></div>
+                <div class="progress-step" id="step-repair" data-step="repair">
+                    <div class="step-indicator">
+                        <div class="step-icon">R</div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-label">Validation Agent: Repair</div>
+                        <div class="step-detail" id="step-repair-detail">Iterative config repair</div>
+                    </div>
+                </div>
+                <div class="progress-connector"></div>
+                <div class="progress-step" id="step-level1" data-step="level1">
+                    <div class="step-indicator">
+                        <div class="step-icon">1</div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-label">Level 1: YAML Parse</div>
+                        <div class="step-detail" id="step-level1-detail">ConfigManager validation</div>
+                    </div>
+                </div>
+                <div class="progress-connector"></div>
+                <div class="progress-step" id="step-level2" data-step="level2">
+                    <div class="step-indicator">
+                        <div class="step-icon">2</div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-label">Level 2: GTAnalysis Init</div>
+                        <div class="step-detail" id="step-level2-detail">Target / ROI model check</div>
+                    </div>
+                </div>
+                <div class="progress-connector"></div>
+                <div class="progress-step" id="step-level3" data-step="level3">
+                    <div class="step-indicator">
+                        <div class="step-icon">3</div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-label">Level 3: gta.setup()</div>
+                        <div class="step-detail" id="step-level3-detail">Real Fermi-LAT data processing</div>
+                    </div>
+                </div>
+                <div class="progress-connector"></div>
+                <div class="progress-step" id="step-level4" data-step="level4">
+                    <div class="step-indicator">
+                        <div class="step-icon">4</div>
+                    </div>
+                    <div class="step-info">
+                        <div class="step-label">Level 4: Science Fit</div>
+                        <div class="step-detail" id="step-level4-detail">gta.optimize() + gta.fit()</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workspace: task sidebar (ChatGPT-style) + panels -->
+        <div class="workspace-row">
+            <!-- Task sidebar: switch between tasks/conversations -->
+            <aside id="task-sidebar" class="task-sidebar">
+                <div class="sidebar-top">
+                    <button class="new-task-btn" onclick="startNewTask()" title="Start a new task">
+                        <span class="plus">+</span> New task
+                    </button>
+                </div>
+                <div id="task-list" class="task-list"></div>
+                <div id="sidebar-hint" class="sidebar-hint"></div>
+            </aside>
+
+        <!-- Main layout -->
+        <div class="main-layout">
+            <!-- Chat panel -->
+            <div id="panel-chat" class="panel panel-chat">
+                <div class="panel-header">
+                    <h2>Conversation</h2>
+                    <span class="agent-badge master">Master Agent</span>
+                </div>
+                <div id="chat-messages" class="chat-messages">
+                    <div class="message assistant">
+                        <div class="message-header">
+                            <span class="agent-tag master">Master Agent</span>
+                        </div>
+                        <div class="message-body">
+                            Welcome! I'm your FermiPy analysis assistant. Describe your gamma-ray analysis task or select a demo sample below.
+                        </div>
+                    </div>
+                    <!-- Demo samples container -->
+                    <div id="demo-samples" class="demo-samples">
+                        <div class="demo-section-title">Demo Samples</div>
+                        <div class="demo-category">
+                            <div class="demo-category-label">Local GPU Model</div>
+                            <div id="demo-local" class="demo-cards"></div>
+                        </div>
+                        <div class="demo-category">
+                            <div class="demo-category-label">Gemini Cloud API</div>
+                            <div id="demo-gemini" class="demo-cards"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <textarea id="chat-input" placeholder="Describe your Fermi-LAT analysis task..." rows="3"></textarea>
+                    <button id="send-btn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+
+            <!-- Code panels container -->
+            <div class="code-panels">
+                <!-- YAML panel -->
+                <div id="panel-yaml" class="panel panel-code">
+                    <div class="panel-header">
+                        <h2>YAML Configuration</h2>
+                        <div class="panel-actions">
+                            <span id="yaml-status" class="status-dot idle"></span>
+                            <button id="yaml-revert-btn" onclick="revertEditor('yaml')" title="Revert to previous version" disabled>&#8617; Revert</button>
+                            <button onclick="copyCode('yaml')" title="Copy">Copy</button>
+                        </div>
+                    </div>
+                    <div id="yaml-proposal" class="proposal-banner hidden">
+                        <span class="proposal-text">Proposed changes &mdash; review the diff below.</span>
+                        <button class="btn-apply" onclick="applyProposal('yaml')">Apply changes</button>
+                        <button class="btn-discard" onclick="discardProposal('yaml')">Discard</button>
+                    </div>
+                    <div class="editor-wrap">
+                        <pre class="editor-highlight" id="yaml-highlight" aria-hidden="true"></pre>
+                        <textarea id="yaml-editor" class="code-editor" data-lang="yaml" spellcheck="false" placeholder="# YAML configuration will appear here..."></textarea>
+                        <pre id="yaml-diff" class="diff-view hidden"></pre>
+                    </div>
+                </div>
+
+                <!-- Python panel -->
+                <div id="panel-python" class="panel panel-code">
+                    <div class="panel-header">
+                        <h2>Python Script</h2>
+                        <div class="panel-actions">
+                            <span id="python-status" class="status-dot idle"></span>
+                            <button id="python-revert-btn" onclick="revertEditor('python')" title="Revert to previous version" disabled>&#8617; Revert</button>
+                            <button onclick="copyCode('python')" title="Copy">Copy</button>
+                        </div>
+                    </div>
+                    <div id="python-proposal" class="proposal-banner hidden">
+                        <span class="proposal-text">Proposed changes &mdash; review the diff below.</span>
+                        <button class="btn-apply" onclick="applyProposal('python')">Apply changes</button>
+                        <button class="btn-discard" onclick="discardProposal('python')">Discard</button>
+                    </div>
+                    <div class="editor-wrap">
+                        <pre class="editor-highlight" id="python-highlight" aria-hidden="true"></pre>
+                        <textarea id="python-editor" class="code-editor" data-lang="python" spellcheck="false" placeholder="# Python script will appear here..."></textarea>
+                        <pre id="python-diff" class="diff-view hidden"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outputs panel: visualizes the produced analysis products -->
+            <div id="panel-outputs" class="panel panel-outputs">
+                <div class="panel-header">
+                    <h2>Analysis Outputs</h2>
+                    <div class="panel-actions">
+                        <span id="outputs-badge" class="pipeline-badge idle">No results yet</span>
+                    </div>
+                </div>
+                <div id="outputs-content" class="outputs-content">
+                    <div class="results-placeholder">
+                        Run the pipeline to visualize the produced outputs &mdash; SED plot,
+                        TS / residual maps, light curve, and the science-quality fit results.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results panel -->
+            <div id="panel-results" class="panel panel-results hidden">
+                <div class="panel-header">
+                    <h2>Pipeline Results</h2>
+                    <div class="panel-actions">
+                        <span id="pipeline-status-badge" class="pipeline-badge idle">Idle</span>
+                    </div>
+                </div>
+                <div id="results-content" class="results-content" data-plugin-slot="results">
+                    <div class="results-placeholder">
+                        Run the pipeline to see validation and execution results here.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notebook panel: hidden by default; enable via the Notebook tab.
+                 Exports the analysis as a downloadable Jupyter notebook. -->
+            <div id="panel-notebook" class="panel panel-notebook hidden">
+                <div class="panel-header">
+                    <h2>Jupyter Notebook</h2>
+                    <div class="panel-actions">
+                        <span id="notebook-badge" class="pipeline-badge idle">Not generated</span>
+                        <button onclick="loadNotebook()" title="Rebuild from the current analysis">&#8635; Refresh</button>
+                        <a id="notebook-download" class="btn-download-all" href="#" download style="display:none">&#8681; Download .ipynb</a>
+                    </div>
+                </div>
+                <div id="notebook-content" class="notebook-content">
+                    <div class="results-placeholder">
+                        Generate an analysis, then this tab exports it as a
+                        self-contained Jupyter notebook &mdash; the request, a
+                        cell that writes <code>config.yaml</code>, the Python
+                        script, the latest run results, and any plots embedded
+                        inline. Use <strong>Save Edits</strong> first to capture
+                        unsaved editor changes.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Explainability panel -->
+            <div id="panel-explain" class="panel panel-explain">
+                <div class="panel-header">
+                    <h2>Agent Transparency</h2>
+                    <div class="panel-actions">
+                        <span class="agent-badge master">Master Agent</span>
+                        <span class="agent-badge validation">Validation Agent</span>
+                    </div>
+                </div>
+                <div id="explain-content" class="explain-content">
+                    <div class="explain-section">
+                        <h3>Multi-Agent Workflow</h3>
+                        <p>The <strong>Master Agent</strong> analyzes your prompt, consults FermiPy documentation (RAG), and generates YAML configuration + Python script using the selected LLM.</p>
+                        <p>The <strong>Validation Agent</strong> iteratively repairs and validates the config through 4 levels:</p>
+                        <ol>
+                            <li><strong>Level 1:</strong> YAML parsing + FermiPy ConfigManager validation</li>
+                            <li><strong>Level 2:</strong> GTAnalysis instantiation (target / ROI model check)</li>
+                            <li><strong>Level 3:</strong> Full gta.setup() execution with real Fermi-LAT data</li>
+                            <li><strong>Level 4:</strong> gta.optimize() + gta.fit() for science-quality results</li>
+                        </ol>
+                        <p>If any level fails, the Validation Agent diagnoses the error and applies targeted deterministic repairs (up to 5 iterations).</p>
+                    </div>
+                    <div id="explain-log" class="explain-log"></div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Bottom action bar -->
+        <div class="action-bar">
+            <button id="run-btn" onclick="runPipeline()" class="btn-primary">Run Pipeline</button>
+            <button id="abort-btn" onclick="abortPipeline()" class="btn-danger" disabled>Abort Run</button>
+            <button id="save-btn" onclick="saveCodes()" class="btn-secondary">Save Edits</button>
+            <button onclick="newSession()" class="btn-secondary">New Session</button>
+            <div id="global-status" class="global-status"></div>
+        </div>
+    </div>
+
+    <!-- Google Identity Services (loads the Sign-In button when a client id is configured) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="/static/core/app.js?v=20260914-1"></script>
+    <!-- Loads every registered UI extension: panels, viewers, chat widgets. -->
+    <script src="/static/core/plugins.js?v=1"></script>
+</body>
+</html>

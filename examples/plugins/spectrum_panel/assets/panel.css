@@ -1,0 +1,10 @@
+/* Scoped to the example panel: a plugin must not restyle the host app. */
+.plugin-panel .example-panel-table { width: 100%; border-collapse: collapse; }
+.plugin-panel .example-panel-table th,
+.plugin-panel .example-panel-table td {
+    padding: 4px 6px;
+    font-size: 11px;
+    text-align: left;
+    border-bottom: 1px solid var(--border, #e5e7eb);
+}
+.plugin-panel .example-panel-empty { font-size: 11px; opacity: 0.7; }

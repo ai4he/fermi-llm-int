@@ -1,0 +1,85 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+
+# Virtual environments and conda
+.venv/
+venv/
+env/
+.conda/
+
+# Local API keys (never commit real credentials)
+configs/gemini_keys.json
+configs/clemson_vllm_key.txt
+configs/openai_key.txt
+configs/google_oauth.json
+configs/client_secret_*.json
+configs/auth_secret.txt
+configs/env.sh
+configs/plugins.toml
+
+# SSL certificate bundles / private keys (installed into the system, never committed)
+4192223755.zip
+*.pem
+*.key
+*.cer
+*.crt
+
+# Web-app runtime artifacts
+webapp/sessions/
+sessions/
+run-events.log
+webapp/server.log
+webapp/monitor.log
+webapp/.server.pid
+*.ngrok.log
+
+# Local result and log directories
+results/
+logs/
+
+# FermiPy / Fermi Science Tools runtime artifacts (created when the user
+# executes the generated pipeline; cluttering the repo with these is wrong)
+*.log
+4FGL_*.log
+*_PH.fits.tmp
+*_filtered_*.fits
+output/
+ft1_*.fits
+ft2_*.fits
+ltcube_*.fits
+srcmap_*.fits
+
+# Webapp progress streams and session caches written at runtime
+webapp/*.log
+webapp/sessions/
+
+# Hugging Face cache (very large; never commit)
+huggingface_cache/
+.cache/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Editor noise
+.vscode/
+.idea/
+*.swp
+*~
+
+# Internal working material: lives in the private research repo, not here
+feedbacks.docx
+FEEDBACK.md
+lora_repro/
+
+# Codex CLI scratch working dir (read-only sandbox; never contains real files)
+.codex_scratch/
+
+# Local plugin drop-in directory: site plugins live here, and the examples
+# are copied in for testing. Keep the directory, ignore its contents.
+plugins/*
+!plugins/README.md

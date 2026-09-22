@@ -1,0 +1,17 @@
+/*
+ * Loaded after classic.css, so it only needs to override the tokens the
+ * rest of the stylesheet already uses.
+ */
+:root {
+    --bg: #0f172a;
+    --bg-alt: #111c33;
+    --panel: #15213c;
+    --border: #24314f;
+    --text-primary: #e2e8f0;
+    --text-secondary: #b7c2d6;
+    --text-muted: #8494ad;
+    --accent: #7c9cff;
+    --accent-light: #1c2a4d;
+}
+
+body { background: var(--bg); color: var(--text-primary); }

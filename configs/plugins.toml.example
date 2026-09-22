@@ -1,0 +1,25 @@
+# Per-deployment component configuration.
+# Copy to configs/plugins.toml; every section is optional.
+
+[plugins]
+# Extra directories scanned for plugins (relative paths resolve against the
+# project root). The default is ["plugins"].
+paths = ["plugins"]
+
+[components]
+# Turn components off by "kind:name" without uninstalling anything.
+# disable = ["guardrail:full_data_defaults", "exporter:artifacts_zip"]
+
+# Or run only an explicit set (useful for a locked-down deployment):
+# only = ["model_provider:openai", "session_store:filesystem"]
+
+# Singleton kinds: pick which component answers.
+# execution_backend = "local_subprocess"
+# session_store = "filesystem"
+# intent_analyzer = "rule_based"
+# skin = "classic"
+
+# Per-component settings, read via ctx.component_settings(kind, name).
+# [settings."validator:strict_energy_range"]
+# min_emin_mev = 100.0
+# max_emax_mev = 500000.0

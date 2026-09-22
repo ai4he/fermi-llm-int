@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fermi-llm"
+version = "0.1.0"
+description = "A modular, pluggable web platform for FermiPy analyses"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "BSD-3-Clause" }
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+# FermiPy and the Fermi ScienceTools come from conda, not pip; see
+# environment.yml. These extras only cover what pip can install.
+dev = ["pytest"]
+
+[project.urls]
+Homepage = "https://github.com/ai4he/fermi-llm-int"
+Documentation = "https://github.com/ai4he/fermi-llm-int/tree/main/docs"
+
+[project.scripts]
+fermi-llm = "fermi_llm.app:main"
+
+# Third-party modules are discovered through this entry-point group. A lab
+# ships its plugin as a normal package and declares, in its own pyproject:
+#
+#   [project.entry-points."fermi_llm.plugins"]
+#   otherlab = "otherlab_fermi.plugin"
+#
+# The referenced object must expose register(registry, ctx).
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+fermi_llm = ["web/static/**/*"]
